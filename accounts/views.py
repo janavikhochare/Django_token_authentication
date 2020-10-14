@@ -117,81 +117,14 @@ def logout(request):
         messages.error(request, "Your session was expired please Login again",)
         ExpiringToken.objects.all().delete()
         auth.logout(request)
+        #return redirect('product_view', kwargs={'product_id': featured_products[0].id})
+        #kwargs = {'product_id': featured_products[0].id}
         #return render(request,'', {'alert_flag': True})
         #return render(request,'/index', {'alert_flag': True})
-        return redirect('/',{'alert_flag': True})
+        return redirect('/',kwargs={'alert_flag': True})
     else:
         token = ExpiringToken.objects.get(user= request.user)
         print(token)
         token.delete()
         auth.logout(request)
         return redirect('/')
-
-
-
-# from .models import UserUniqueToken
-# from django.shortcuts import get_object_or_404
-# from django.contrib.auth.decorators import login_required
-# from django.utils import timezone
-# from datetime import timedelta
-#
-# @login_required
-# def user_form(request, token):
-#     user_token = get_object_or_404(UserUniqueToken, token=token)  # get object or throw 404
-#     time_now = timezone.now()  # get current time
-#     if user_token.datetime > (time_now - timedelta(hours=0.01)):# check if stored time exceeds 2 hours
-#         messages.info(request,"Login again")
-#     return render(request,'login.html')
-
-
-# import datetime
-# from django.utils.timezone import utc
-# from rest_framework.authtoken.views import ObtainAuthToken
-# from rest_framework.authtoken.models import Token
-# from django.http import HttpResponse
-# import json
-# from rest_framework import status
-
-# class ObtainExpiringAuthToken(ObtainAuthToken):
-#     def post(self, request):
-#         serializer = self.serializer_class(data=request.DATA)
-#         if serializer.is_valid():
-#             token, created =  Token.objects.get_or_create(user=serializer.object['user'])
-#
-#             utc_now = datetime.datetime.utcnow()
-#             if not created and token.created < utc_now - datetime.timedelta(hours=1):
-#                 token.delete()
-#                 token = Token.objects.create(user=serializer.object['user'])
-#                 token.created = datetime.datetime.utcnow()
-#                 token.save()
-#
-#             #return Response({'token': token.key})
-#             response_data = {'token': token.key}
-#             return HttpResponse(json.dumps(response_data), content_type="application/json")
-#
-#         return HttpResponse(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
-#
-# obtain_expiring_auth_token = ObtainExpiringAuthToken.as_view()
-
-# import datetime
-# from pytz import utc
-# from rest_framework import status
-# from rest_framework.response import Response
-# from rest_framework.authtoken.models import Token
-# from rest_framework.authtoken.views import ObtainAuthToken
-# from rest_framework.authtoken.serializers import AuthTokenSerializer
-#
-#
-# class ObtainExpiringAuthToken(ObtainAuthToken):
-#     def post(self, request, **kwargs):
-#         serializer = AuthTokenSerializer(data=request.data)
-#
-#         if serializer.is_valid():
-#             token, created = Token.objects.get_or_create(user=serializer.validated_data['user'])
-#             if not created:
-#                 # update the created time of the token to keep it valid
-#                 token.created = datetime.datetime.utcnow().replace(tzinfo=utc)
-#                 token.save()
-#
-#             return Response({'token': token.key})
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

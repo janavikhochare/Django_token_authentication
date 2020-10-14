@@ -564,8 +564,13 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 	</footer>
 </div>
 
+<!--{% if alert_flag %}-->
+<!--    <script>alert("Your script ")</script>-->
+<!--{% endif %}-->
+
 {% if alert_flag %}
-    <script>alert("Your script ")</script>
+
+    <script> alert("Some Message."); </script>
 {% endif %}
 
 <script src="{% static 'js/jquery-3.2.1.min.js'%}"></script>

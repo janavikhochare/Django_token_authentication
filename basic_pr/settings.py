@@ -67,7 +67,7 @@ MIDDLEWARE = [
     'django_session_timeout.middleware.SessionTimeoutMiddleware',
 ]
 
-SESSION_EXPIRE_SECONDS = 50
+SESSION_EXPIRE_SECONDS = 1800
 
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 
@@ -91,7 +91,7 @@ TEMPLATES = [
     },
 ]
 
-EXPIRING_TOKEN_DURATION= timedelta(seconds=600)
+EXPIRING_TOKEN_DURATION= timedelta(seconds=1800)
 # Any timedelta setting can be used! If not set, the default value is 1 day
 
 WSGI_APPLICATION = 'basic_pr.wsgi.application'
