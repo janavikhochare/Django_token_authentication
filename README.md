@@ -25,8 +25,8 @@ It implements the following functionalities:
   
   Go to the directory where Django_token_authentication downloaded
   
-  python manage.py makemigrations
-  python manage.py migrate
+  python manage.py makemigrations \
+  python manage.py migrate \
   python manage.py runserver
   
   Then go to the browser and enter the url http://127.0.0.1:8000/
