@@ -4,10 +4,8 @@
 
 Custom Django middleware for token based authentication
 
-<<<<<<< HEAD
 
 
-=======
 It implements the following functionalities:
 
     
@@ -48,5 +46,3 @@ It implements the following functionalities:
   
  
   
-  
->>>>>>> a30c7d58d20d5e545b7c695b3db87bda3d9cb54d
