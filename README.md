@@ -20,7 +20,7 @@ It implements the following functionalities:
   
   Requirements:
   
-  Python-3.6
+  Python-3.6 \
   pip3 install -r requirements.txt
   
   Go to the directory where Django_token_authentication downloaded
