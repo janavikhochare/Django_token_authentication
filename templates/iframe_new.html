@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style media="screen">
+  .frame-area {
+display: block;
+width: 100%;  /* RESPONSIVE WIDTH */
+max-width: 500px;
+height: 720px; /* EDIT TO hidden FOR NO SCROLLBAR */
+border: #999999 1px solid;
+margin: 0px;
+padding: 0px;
+}
+
+
+  </style>
+
+</head>
+<body>
+        <iframe is="x-frame-bypass"  id ="myiframe" src="https://live.euronext.com/en/site-home-page" width="890" height="900" border = "3 px " >
+         </iframe>
+
+</body>
+{% load static %}
+
+
+                    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+                   ` <script type="module" >
+customElements.define('x-frame-bypass', class extends HTMLIFrameElement {
+	constructor () {
+		super()
+	}
+	connectedCallback () {
+		this.load(this.src)
+		this.src = ''
+		this.sandbox = '' + this.sandbox || 'allow-forms allow-modals allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation' // all except allow-top-navigation
+	}
+	load (url, options) {
+		if (!url || !url.startsWith('http'))
+			throw new Error(`X-Frame-Bypass src ${url} does not start with http(s)://`)
+		console.log('X-Frame-Bypass loading:', url)
+		this.srcdoc = `<html>
+<head>
+	<style>
+	.loader {
+		position: absolute;
+		top: calc(50% - 25px);
+		left: calc(50% - 25px);
+		width: 50px;
+		height: 50px;
+		background-color: #333;
+		border-radius: 50%;
+		animation: loader 1s infinite ease-in-out;
+	}
+	@keyframes loader {
+		0% {
+		transform: scale(0);
+		}
+		100% {
+		transform: scale(1);
+		opacity: 0;
+		}
+	}
+	</style>
+
+</head>
+<body>
+	<div class="loader"></div>
+</body>
+</html>`
+		this.fetchProxy(url, options, 0).then(res => res.text()).then(data => {
+			if (data)
+				this.srcdoc = data.replace(/<head([^>]*)>/i, `<head$1>
+	<base href="${url}">
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"><\/script>
+	<script type="text/javascript" >
+
+
+
+
+
+
+
+var _global = typeof window === 'object' && window.window === window
+  ? window : typeof self === 'object' && self.self === self
+  ? self : typeof global === 'object' && global.global === global
+  ? global
+  : this
+
+function bom (blob, opts) {
+  if (typeof opts === 'undefined') opts = { autoBom: false }
+  else if (typeof opts !== 'object') {
+    console.warn('Deprecated: Expected third argument to be a object')
+    opts = { autoBom: !opts }
+  }
+
+  if (opts.autoBom && /^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
+    return new Blob([String.fromCharCode(0xFEFF), blob], { type: blob.type })
+  }
+  return blob
+}
+
+function download (url, name, opts) {
+  var xhr = new XMLHttpRequest()
+  xhr.open('GET', url)
+  xhr.responseType = 'blob'
+  xhr.onload = function () {
+    saveAs(xhr.response, name, opts)
+  }
+  xhr.onerror = function () {
+    console.error('could not download file')
+  }
+  xhr.send()
+}
+
+function corsEnabled (url) {
+  var xhr = new XMLHttpRequest()
+  // use sync to avoid popup blocker
+  xhr.open('HEAD', url, false)
+  try {
+    xhr.send()
+  } catch (e) {}
+  return xhr.status >= 200 && xhr.status <= 299
+}
+
+
+function click (node) {
+  try {
+    node.dispatchEvent(new MouseEvent('click'))
+  } catch (e) {
+    var evt = document.createEvent('MouseEvents')
+    evt.initMouseEvent('click', true, true, window, 0, 0, 0, 80,
+                          20, false, false, false, false, 0, null)
+    node.dispatchEvent(evt)
+  }
+}
+
+// Detect WebView inside a native macOS app by ruling out all browsers
+// We just need to check for 'Safari' because all other browsers (besides Firefox) include that too
+// https://www.whatismybrowser.com/guides/the-latest-user-agent/macos
+var isMacOSWebView = /Macintosh/.test(navigator.userAgent) && /AppleWebKit/.test(navigator.userAgent) && !/Safari/.test(navigator.userAgent)
+
+var saveAs = _global.saveAs || (
+  // probably in some web worker
+  (typeof window !== 'object' || window !== _global)
+    ? function saveAs () { /* noop */ }
+
+  // Use download attribute first if possible (#193 Lumia mobile) unless this is a macOS WebView
+  : ('download' in HTMLAnchorElement.prototype && !isMacOSWebView)
+  ? function saveAs (blob, name, opts) {
+    var URL = _global.URL || _global.webkitURL
+    var a = document.createElement('a')
+    name = name || blob.name || 'download'
+
+    a.download = name
+    a.rel = 'noopener' // tabnabbing
+
+    // TODO: detect chrome extensions & packaged apps
+    // a.target = '_blank'
+
+    if (typeof blob === 'string') {
+      // Support regular links
+      a.href = blob
+      if (a.origin !== location.origin) {
+        corsEnabled(a.href)
+          ? download(blob, name, opts)
+          : click(a, a.target = '_blank')
+      } else {
+        click(a)
+      }
+    } else {
+      // Support blobs
+      a.href = URL.createObjectURL(blob)
+      setTimeout(function () { URL.revokeObjectURL(a.href) }, 4E4) // 40s
+      setTimeout(function () { click(a) }, 0)
+    }
+  }
+
+  // Use msSaveOrOpenBlob as a second approach
+  : 'msSaveOrOpenBlob' in navigator
+  ? function saveAs (blob, name, opts) {
+    name = name || blob.name || 'download'
+
+    if (typeof blob === 'string') {
+      if (corsEnabled(blob)) {
+        download(blob, name, opts)
+      } else {
+        var a = document.createElement('a')
+        a.href = blob
+        a.target = '_blank'
+        setTimeout(function () { click(a) })
+      }
+    } else {
+      navigator.msSaveOrOpenBlob(bom(blob, opts), name)
+    }
+  }
+
+  // Fallback to using FileReader and a popup
+  : function saveAs (blob, name, opts, popup) {
+    // Open a popup immediately do go around popup blocker
+    // Mostly only available on user interaction and the fileReader is async so...
+    popup = popup || open('', '_blank')
+    if (popup) {
+      popup.document.title =
+      popup.document.body.innerText = 'downloading...'
+    }
+
+    if (typeof blob === 'string') return download(blob, name, opts)
+
+    var force = blob.type === 'application/octet-stream'
+    var isSafari = /constructor/i.test(_global.HTMLElement) || _global.safari
+    var isChromeIOS = /CriOS\/[\d]+/.test(navigator.userAgent)
+
+    if ((isChromeIOS || (force && isSafari) || isMacOSWebView) && typeof FileReader !== 'undefined') {
+      // Safari doesn't allow downloading of blob URLs
+      var reader = new FileReader()
+      reader.onloadend = function () {
+        var url = reader.result
+        url = isChromeIOS ? url : url.replace(/^data:[^;]*;/, 'data:attachment/file;')
+        if (popup) popup.location.href = url
+        else location = url
+        popup = null // reverse-tabnabbing #460
+      }
+      reader.readAsDataURL(blob)
+    } else {
+      var URL = _global.URL || _global.webkitURL
+      var url = URL.createObjectURL(blob)
+      if (popup) popup.location = url
+      else location.href = url
+      popup = null // reverse-tabnabbing #460
+      setTimeout(function () { URL.revokeObjectURL(url) }, 4E4) // 40s
+    }
+  }
+)
+
+_global.saveAs = saveAs.saveAs = saveAs
+
+if (typeof module !== 'undefined') {
+  module.exports = saveAs;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+	<\/script>
+	<script type="text/javascript">
+
+
+	var DomOutline = function (options) {
+		options = options || {};
+		var blank = '';
+		var pub = {};
+
+		var list = '';
+		var self = {
+				opts: {
+						namespace: options.namespace || 'DomOutline',
+						borderWidth: options.borderWidth || 2,
+						onClick: options.onClick || false,
+						filter: options.filter || false
+				},
+				keyCodes: {
+						BACKSPACE: 8,
+						ESC: 27,
+						DELETE: 46
+				},
+				active: false,
+				initialized: false,
+				elements: {}
+		};
+
+		function writeStylesheet(css) {
+				var element = document.createElement('style');
+				element.type = 'text/css';
+				document.getElementsByTagName('head')[0].appendChild(element);
+
+				if (element.styleSheet) {
+						element.styleSheet.cssText = css; // IE
+				} else {
+						element.innerHTML = css; // Non-IE
+				}
+		}
+
+		function initStylesheet() {
+				if (self.initialized !== true) {
+						var css = '' +
+								'.' + self.opts.namespace + ' {' +
+								'    background: #09c;' +
+								'    position: absolute;' +
+								'    z-index: 1000000;' +
+								'}' +
+								'.' + self.opts.namespace + '_label {' +
+								'    background: #09c;' +
+								'    border-radius: 2px;' +
+								'    color: #fff;' +
+								'    font: bold 12px/12px Helvetica, sans-serif;' +
+								'    padding: 4px 6px;' +
+								'    position: absolute;' +
+								'    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);' +
+								'    z-index: 1000001;' +
+								'}';
+
+						writeStylesheet(css);
+						self.initialized = true;
+				}
+		}
+
+		function createOutlineElements() {
+				self.elements.label = jQuery('<div></div>').addClass(self.opts.namespace + '_label').appendTo('body');
+				self.elements.top = jQuery('<div></div>').addClass(self.opts.namespace).appendTo('body');
+				self.elements.bottom = jQuery('<div></div>').addClass(self.opts.namespace).appendTo('body');
+				self.elements.left = jQuery('<div></div>').addClass(self.opts.namespace).appendTo('body');
+				self.elements.right = jQuery('<div></div>').addClass(self.opts.namespace).appendTo('body');
+		}
+
+		function removeOutlineElements() {
+				jQuery.each(self.elements, function(name, element) {
+						element.remove();
+				});
+		}
+
+		function compileLabelText(element, x, y) {
+				var label = element.tagName.toLowerCase();
+				if (element.id) {
+						label += '#' + element.id;
+				}
+				if (element.className) {
+						label += ('.' + jQuery.trim(element.className).replace(/ /g, '.')).replace(/\.\.+/g, '.');
+				}
+	var dims = ' (' + Math.round(x) + 'x' + Math.round(y) + ')'
+				return dims;
+		}
+
+		function getScrollTop() {
+				if (!self.elements.window) {
+						self.elements.window = jQuery(window);
+				}
+				return self.elements.window.scrollTop();
+		}
+
+		function updateOutlinePosition(e) {
+				if (e.target.className.indexOf(self.opts.namespace) !== -1) {
+						return;
+				}
+				if (self.opts.filter) {
+						if (!jQuery(e.target).is(self.opts.filter)) {
+								return;
+						}
+				}
+				pub.element = e.target;
+
+				var b = self.opts.borderWidth;
+				var scroll_top = getScrollTop();
+				var pos = pub.element.getBoundingClientRect();
+				var top = pos.top + scroll_top;
+				var x = e.clientX;
+				var y =  e.clientY;
+				var label_text = compileLabelText(pub.element, x, y);
+				self.list = self.list + label_text
+				var label_top = Math.max(0, top - 20 - b, scroll_top);
+				var label_left = Math.max(0, pos.left - b);
+
+				self.elements.label.css({ top: label_top, left: label_left }).text(label_text);
+				self.elements.top.css({ top: Math.max(0, top - b), left: pos.left - b, width: pos.width + b, height: b });
+				self.elements.bottom.css({ top: top + pos.height, left: pos.left - b, width: pos.width + b, height: b });
+				self.elements.left.css({ top: top - b, left: Math.max(0, pos.left - b), width: b, height: pos.height + b });
+				self.elements.right.css({ top: top - b, left: pos.left + pos.width, width: b, height: pos.height + (b * 2) });
+
+		}
+
+		function stopOnEscape(e) {
+				if (e.keyCode === self.keyCodes.ESC || e.keyCode === self.keyCodes.BACKSPACE || e.keyCode === self.keyCodes.DELETE) {
+						pub.stop();
+				}
+				var blob = new Blob([self.list], { type: "text/plain;charset=utf-8" });
+				saveAs(blob, "dynamic.txt");//server side
+				return false;
+		}
+
+		function clickHandler(e) {
+
+				self.opts.onClick(pub.element);
+				return false;
+		}
+
+		pub.start = function () {
+				initStylesheet();
+				if (self.active !== true) {
+						self.active = true;
+						createOutlineElements();
+						jQuery('body').on('click.' + self.opts.namespace, updateOutlinePosition);
+						jQuery('body').on('keyup.' + self.opts.namespace, stopOnEscape);
+						if (self.opts.onClick) {
+								setTimeout(function () {
+										jQuery('body').on('mousemove.' + self.opts.namespace, function(e){
+												if (self.opts.filter) {
+														if (!jQuery(e.target).is(self.opts.filter)) {
+																return false;
+														}
+												}
+												clickHandler.call(this, e);
+										});
+								}, 50);
+						}
+				}
+
+		};
+
+		pub.stop = function () {
+				self.active = false;
+				removeOutlineElements();
+				jQuery('body').off('click.' + self.opts.namespace)
+						.off('keyup.' + self.opts.namespace)
+						.off('click.' + self.opts.namespace);
+		};
+
+		return pub;
+	};
+
+
+	$(document).ready(function() {
+
+	console.log('in file##########***');
+	var myClickHandler = function (element) { console.log('Clicked element:', element); }
+	 var myDomOutline  = new DomOutline({ onClick: myDomOutline });// myClickHandler
+		// Start outline:
+		myDomOutline.start();
+		//console.log(final)
+		// Stop outline (also stopped on escape/backspace/delete keys):
+		//myDomOutline.stop();
+
+
+	});
+	<\/script>
+	<script>
+	// X-Frame-Bypass navigation event handlers
+	document.addEventListener('click', e => {
+		if (frameElement && document.activeElement && document.activeElement.href) {
+			e.preventDefault()
+			frameElement.load(document.activeElement.href)
+		}
+	})
+	document.addEventListener('submit', e => {
+		if (frameElement && document.activeElement && document.activeElement.form && document.activeElement.form.action) {
+			e.preventDefault()
+			if (document.activeElement.form.method === 'post')
+				frameElement.load(document.activeElement.form.action, {method: 'post', body: new FormData(document.activeElement.form)})
+			else
+				frameElement.load(document.activeElement.form.action + '?' + new URLSearchParams(new FormData(document.activeElement.form)))
+		}
+	})
+	<\/script>`)
+		}).catch(e => console.error('Cannot load X-Frame-Bypass:', e))
+	}
+	fetchProxy (url, options, i) {
+		const proxy = [
+			'https://cors.io/?',
+			'https://jsonp.afeld.me/?url=',
+			'https://cors-anywhere.herokuapp.com/'
+		]
+		return fetch(proxy[i] + url, options).then(res => {
+			if (!res.ok)
+				throw new Error(`${res.status} ${res.statusText} this cant be done heree`);
+			return res
+		}).catch(error => {
+			if (i === proxy.length - 1)
+				throw error
+			return this.fetchProxy(url, options, i + 1)
+		})
+	}
+}, {extends: 'iframe'})
+
+
+
+
+                  </script>`
+                  <script>
+
+                      function loadScripts() {
+                              $.getScript("https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js");
+                              $.getScript("https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.js");
+                              $.getScript("{% static 'js/FileSaver.js' %}");//https://greasyfork.org/en/scripts/2350-filesaver-js/code
+                              $.getScript("{% static 'js/jquery.dom-outline-1.0.js' %}");
+                      }
+                  </script>
+
+                  <script type="text/javascript">
+
+                  $(document).ready(function(){
+                    console.log("#########################################");
+                    setTimeout(function(){
+                        console.log("*****************************************",);
+                        var scriptTag = '<script> console.log("^&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");var DomOutline=function(e){var t={},o={opts:{namespace:(e=e||{}).namespace||"DomOutline",borderWidth:e.borderWidth||2,onClick:e.onClick||!1,filter:e.filter||!1},keyCodes:{BACKSPACE:8,ESC:27,DELETE:46},active:!1,initialized:!1,elements:{}};function n(){!0!==o.initialized&&(!function(e){var t=document.createElement("style");t.type="text/css",document.getElementsByTagName("head")[0].appendChild(t),t.styleSheet?t.styleSheet.cssText=e:t.innerHTML=e}("."+o.opts.namespace+" {    background: #09c;position: absolute;    z-index: 1000000;}."+o.opts.namespace+"_label {    background: #09c;    border-radius: 2px;    color: #fff;    font: bold 12px/12px Helvetica, sans-serif;    padding: 4px 6px;    position: absolute;    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);    z-index: 1000001;}"),o.initialized=!0)}function s(e){if(-1===e.target.className.indexOf(o.opts.namespace)&&(!o.opts.filter||jQuery(e.target).is(o.opts.filter))){t.element=e.target;var n=o.opts.borderWidth,s=(o.elements.window||(o.elements.window=jQuery(window)),o.elements.window.scrollTop()),a=t.element.getBoundingClientRect(),i=a.top+s,l=e.clientX,d=e.clientY,p=function(e,t,o){return e.tagName.toLowerCase(),e.id&&e.id,e.className&&("."+jQuery.trim(e.className).replace(/ /g,".")).replace(/\.\.+/g,".")," ("+Math.round(t)+"x"+Math.round(o)+")"}(t.element,l,d);o.list=o.list+p;var c=Math.max(0,i-20-n,s),r=Math.max(0,a.left-n);o.elements.label.css({top:c,left:r}).text(p),o.elements.top.css({top:Math.max(0,i-n),left:a.left-n,width:a.width+n,height:n}),o.elements.bottom.css({top:i+a.height,left:a.left-n,width:a.width+n,height:n}),o.elements.left.css({top:i-n,left:Math.max(0,a.left-n),width:n,height:a.height+n}),o.elements.right.css({top:i-n,left:a.left+a.width,width:n,height:a.height+2*n})}}function a(e){e.keyCode!==o.keyCodes.ESC&&e.keyCode!==o.keyCodes.BACKSPACE&&e.keyCode!==o.keyCodes.DELETE||t.stop();var n=new Blob([o.list],{type:"text/plain;charset=utf-8"});return saveAs(n,"dynamic.txt"),!1}return t.start=function(){n(),!0!==o.active&&(o.active=!0,o.elements.label=jQuery("<div></div>").addClass(o.opts.namespace+"_label").appendTo("body"),o.elements.top=jQuery("<div></div>").addClass(o.opts.namespace).appendTo("body"),o.elements.bottom=jQuery("<div></div>").addClass(o.opts.namespace).appendTo("body"),o.elements.left=jQuery("<div></div>").addClass(o.opts.namespace).appendTo("body"),o.elements.right=jQuery("<div></div>").addClass(o.opts.namespace).appendTo("body"),jQuery("body").on("click."+o.opts.namespace,s),jQuery("body").on("keyup."+o.opts.namespace,a),o.opts.onClick&&setTimeout(function(){jQuery("body").on("mousemove."+o.opts.namespace,function(e){if(o.opts.filter&&!jQuery(e.target).is(o.opts.filter))return!1;(function(e){return o.opts.onClick(t.element),!1}).call(this,e)})},50))},t.stop=function(){o.active=!1,jQuery.each(o.elements,function(e,t){t.remove()}),jQuery("body").off("click."+o.opts.namespace).off("keyup."+o.opts.namespace).off("click."+o.opts.namespace)},t};$(document).ready(function(){console.log("in file##########***");var e=new DomOutline({onClick:e});e.start()});<\/script>';
+                        console.log(scriptTag);
+                        //var content = $($.parseHTML(source, document, true));
+                        //$("#content").contents().find("html").html(content);
+                        //var cw = document.getElementById("content").contentWindow;
+                        //[].forEach.call(cw.document.querySelectorAll("script"), function (el, idx) {
+                        //cw.eval(el.textContent);
+                        //});
+                        var div = document.createElement("div");
+                        div.className = "frame-area";
+                        div.textContent = "Your favorite color is now blue";
+
+                        var a = document.createElement("A");
+                        a.className = "frame-area-1"
+                        //var t = document.createTextNode("Tutorials");
+                        //x.setAttribute("href", "https://www.w3schools.com");
+                        //x.appendChild(t);
+                        //document.body.appendChild(x);
+
+                        var link = document.createTextNode("This is link for Google")
+                        a.appendChild(link);
+                        // Set the title.
+                        a.title = "This is Link for Google";
+
+                        // Set the href property.
+                        a.href = "https://www.google.com/";
+
+
+                       $("#myiframe").contents().find("body").append(div);
+                       $("#myiframe").contents().find("body").append(a);
+                       $("#myiframe").contents().find("")
+                        console.log("sssssssssssssssssssssssssssssssssssssss",);
+                     }, 10000);
+
+
+                  })
+
+                  </script>
+
+</html>
+
