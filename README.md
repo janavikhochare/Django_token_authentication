@@ -1,6 +1,6 @@
 # Django_token_authentication
 
-#Introduction
+# Introduction
 
 Custom Django middleware for token based authentication
 
@@ -21,5 +21,25 @@ It implements the following functionalities:
   Reuirements:
   Python-3.6
   pip3 install -r requirements.txt
+  
+  Go to the directory where Django_token_authentication downloaded
+  
+  python manage.py makemigrations
+  python manage.py migrate
+  python manage.py runserver
+  
+  Then go to the browser and enter the url http://127.0.0.1:8000/
+  
+# Login or Register
+
+  You can access the django admin page at http://127.0.0.1:8000/admin by creating admin user i.e the superuser
+  Also a new admin user can be created using  
+  python manage.py createsuperuser
+
+  For a normal user which is not a superuser, login and register can be done on the webpage itself.
+  
+  For viewing extra additional details regarding the webpage the user needs to login and authenticate his token.
+  
+ 
   
   
