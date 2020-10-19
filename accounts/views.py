@@ -17,6 +17,11 @@ from django.utils.timezone import utc
 import pytz
 
 def login(request):
+    """
+    param: request
+    functionality: The user login's to the page via this function
+    return: to a page based on user actions
+    """
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -40,13 +45,18 @@ def login(request):
             #return render(request,redirect('/'),{'token':token})
         else:
             messages.info(request, 'invalid credentials')
-            return redirect('login')
+            return redirect('/accounts/login')
     else:
         return render(request, 'login.html')
 
 
 
 def register(request):
+    """
+    param: request
+    functionality: The user register's via this function
+    return: to a page based on user actions
+    """
     if request.method == "POST":
         first_name = request.POST['first_name']
         last_name = request.POST['last_name']
@@ -84,6 +94,12 @@ def register(request):
         return render(request, 'register.html')
 
 def token_authenti(request):
+    """
+    param: request
+    functionality: Token based authentication is checked via this function and the user is provided with
+    some extra views if the token is authenticated
+    return: to a page based on user actions
+    """
     if request.method == 'POST':
         username = request.POST['username']
         user_token= request.POST['token']
@@ -112,7 +128,13 @@ def token_authenti(request):
     return render(request,'token_authenti.html')
 
 def logout(request):
-    print(request.user)
+    """
+    param: request
+    functionality: Logout action is carried out via this function
+    return: to a page based on user actions
+    """
+
+    #print(request.user)
     if not request.user.is_authenticated:
         messages.error(request, "Your session was expired please Login again",)
         ExpiringToken.objects.all().delete()
